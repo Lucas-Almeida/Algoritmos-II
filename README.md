@@ -1,3 +1,3 @@
-# Algoritmos--II
+# Algoritmos-II
 
-Arvore AVL para estudar
+Arvore AVL  em C++
