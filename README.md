@@ -1,0 +1,565 @@
+# Algoritmos--II
+
+#include <iostream>
+#include <stdlib.h>
+using namespace std;
+
+struct noh {
+
+	int valor, fb , nivel;
+	noh *esquerda, *direita, *pai;
+};
+
+struct arvore
+{
+	noh *raiz;
+};
+
+// Assinaturas de métodos:
+
+void preOrdem(arvore &arv);
+void preOrdemRec(noh* n);
+void emOrdem(arvore &arv);
+void emOrdemRec(noh* n);
+void posOrdem(arvore &arv);
+void posOrdemRec(noh* n);
+
+void insereNoh(arvore &arv, int val);
+void insereRec(noh* raiz, noh* n);
+void atualizar (arvore &arv, noh* n);
+
+int altura(noh* raiz);
+void calcula_fb(noh* n);
+
+noh* balanceamento(noh* n);
+
+noh* rotacaoEsq(noh* n);
+noh* rotacaoDir(noh* n);
+noh* rotacaoDirEsq(noh* n);
+noh* rotacaoEsqDir(noh* n);
+
+noh* busca(arvore &a, int val);
+noh* maisEsquerda(noh* raiz);
+noh* maisDireita(noh* raiz);
+
+void remover(arvore &a, int val);
+void removerRec(noh* n);
+
+void insereNoh(arvore &arv, int val)
+{
+	noh* n = new noh();
+	n->valor = val;
+	n->esquerda = NULL;
+	n->direita = NULL;
+	n->pai = NULL;
+	n->fb = 0;
+
+	if (arv.raiz == NULL)
+		arv.raiz = n;
+	else
+		insereRec(arv.raiz, n);
+		
+	atualizar(arv,n);
+}
+
+void insereRec(noh* raiz, noh* n)
+{
+	if (raiz->valor < n->valor)
+	{
+		if (raiz->direita != NULL)
+			insereRec(raiz->direita, n);
+		else
+		{
+			raiz->direita = n;
+			n->pai = raiz;
+			calcula_fb(n->pai);
+		}
+		
+	}
+	else {
+		if (raiz->esquerda != NULL)
+			insereRec(raiz->esquerda, n);
+		else
+		{
+			raiz->esquerda = n;
+			n->pai = raiz;
+			calcula_fb(n->pai);
+		
+		}
+	}
+	if(raiz->valor == n->valor){
+		cout<<"Valor duplicado!\n";
+	}
+	
+}
+
+
+
+int altura(noh* raiz)
+{
+	if (raiz == NULL)
+		return 0;
+	
+	
+	int he = altura(raiz->esquerda);
+	int hd = altura(raiz->direita);
+
+	int maior = (he > hd) ? he : hd;
+
+	return 1 + maior;
+}
+
+noh* rotacaoEsq(noh* n) {
+	
+
+
+		n->direita->pai = n->pai;
+		n->pai = n->direita;
+		n->direita = n->pai->esquerda;
+	    n->pai->esquerda = n;
+		
+		if(n->direita != NULL){
+			n->direita->pai = n;
+		}
+		
+		if(n->pai->pai != NULL){
+		
+			if( n->pai->pai->esquerda == n){
+				n->pai->pai->esquerda = n->pai;
+			}
+			else{
+				n->pai->pai->direita = n->pai;
+			}
+		
+		}
+	
+		
+	return n;
+}
+
+noh* rotacaoDir(noh* n) {
+	
+
+		n->esquerda->pai = n->pai;
+		n->pai = n->esquerda;
+		n->esquerda = n->pai->direita;
+		n->pai->direita = n;
+		if(n->esquerda != NULL){
+		
+		n->esquerda->pai = n;
+	
+
+		}
+		if(n->pai->pai != NULL){
+		
+		if(n->pai->pai->direita == n){
+			n->pai->pai->direita = n->pai;
+		}else{
+			
+			n->pai->pai->esquerda = n->pai;
+		}
+		
+		}
+	
+	return n;
+}
+
+noh* rotacaoDirEsq(noh* n) {
+
+		rotacaoDir(n->direita);
+		rotacaoEsq(n);
+	return n;
+
+}
+noh* rotacaoEsqDir(noh* n) {
+
+		rotacaoEsq(n->esquerda);
+		rotacaoDir(n);
+	return n;
+}
+
+
+void calcula_fb(noh* n) {
+	if (n == NULL) return;
+	
+	n->fb =altura(n->direita) - altura(n->esquerda);
+	if(n->fb <= -2 || n->fb >= 2){
+	
+		balanceamento(n);
+	
+	}else{
+		calcula_fb(n->pai);
+	}
+
+}
+
+noh* balanceamento(noh* n) {
+
+
+	if (n != NULL) {
+
+		
+	
+
+		if (n->fb >= 2) {
+			if (n->direita->fb >= 0) {
+				n = rotacaoEsq(n);
+				calcula_fb(n->esquerda);
+			}
+			else {
+				n = rotacaoDirEsq(n);
+
+			}
+		}
+
+	if (n->fb <= -2) {
+			
+			if (n->esquerda->fb <= 0){
+			
+				n = rotacaoDir(n);
+				calcula_fb(n->direita);
+			}
+			else {
+			n = rotacaoEsqDir(n);
+			}
+		}
+	}
+	
+	return n;
+}
+void atualizar (arvore &arv, noh* n){
+	while(n->pai != NULL){
+		n = n->pai;
+		
+	}
+	arv.raiz = n;
+}
+void preOrdem(arvore &arv)
+{
+	preOrdemRec(arv.raiz);
+}
+
+void preOrdemRec(noh* n)
+{
+	if (n != NULL)
+	{
+		cout << n->valor << ", ";
+		preOrdemRec(n->esquerda);
+		preOrdemRec(n->direita);
+	}
+}
+
+void emOrdem(arvore &arv)
+{
+	emOrdemRec(arv.raiz);
+}
+
+void emOrdemRec(noh* n)
+{
+	if (n != NULL)
+	{
+		emOrdemRec(n->esquerda);
+		cout << n->valor << "\n ";
+		emOrdemRec(n->direita);
+	}
+}
+
+void posOrdem(arvore &arv)
+{
+	posOrdemRec(arv.raiz);
+}
+
+void posOrdemRec(noh* n)
+{
+	if (n != NULL)
+	{
+		posOrdemRec(n->esquerda);
+		posOrdemRec(n->direita);
+		cout << n->valor << ", ";
+	}
+}
+
+
+noh* busca(arvore &a, int val)
+{
+	noh* r = a.raiz;
+
+	if (r == NULL) return NULL;
+
+	while (r != NULL && r->valor != val)
+	{
+		if (val <= r->valor)
+			r = r->esquerda;
+		else
+			r = r->direita;
+	}
+
+	return r;
+}
+noh* maisEsquerda(noh* raiz)
+{
+	noh* p = raiz;
+
+	while (p->esquerda != NULL)
+		p = p->esquerda;
+
+	return p;
+}
+
+noh* maisDireita(noh* raiz)
+{
+	noh* p = raiz;
+
+	while (p->direita != NULL)
+		p = p->direita;
+
+	return p;
+}
+
+void remover(arvore &a, int val)
+{
+	noh* n = busca(a, val);
+
+	if (n == NULL) return;
+
+	removerRec(n);
+	atualizar(a,n);
+}
+
+
+void removerRec(noh* n)
+{
+	if (n->esquerda == NULL && n->direita == NULL)
+	{
+		noh* p = n->pai;
+		if (n == p->esquerda) p->esquerda = NULL;
+		else p->direita = NULL;
+		delete n;
+		calcula_fb(p);
+		return;
+	}
+
+	noh* a;
+	if (n->esquerda != NULL)
+		a = maisDireita(n->esquerda);
+	else
+		a = maisEsquerda(n->direita);
+
+	n->valor = a->valor;
+	removerRec(a);
+}
+
+noh* desalocar(noh* n) {
+	if (n != NULL)
+	{
+		n->esquerda = desalocar(n->esquerda);
+		n->direita = desalocar(n->direita);
+	}
+	return NULL;
+}
+/*int altura_N(noh* raiz , int nivel){
+		if (raiz == NULL) return 0;
+	
+	raiz->nivel = nivel;
+	int he = altura_N(raiz->esquerda,nivel + 1);
+	int hd = altura_N(raiz->direita, nivel + 1);
+	
+	int maior = (he > hd) ? he : hd;
+	
+	return 1 + maior;
+}*/
+/*void exibi(arvore &arv , int nivel ){
+
+	exibiREC(arv.raiz, nivel);
+}
+void exibiREC (noh* n , int nivel){
+	
+	int i;
+	if(n != NULL){
+		
+		exibiREC(n->esquerda , nivel + 1);
+		for(i = 0; i < nivel ; i++){
+			cout << " ";
+		}
+		cout << n->valor << "\t";
+		exibiREC(n->direita , nivel + 1);
+	}
+}*/
+int main()
+{
+	arvore a;
+	noh* aux;
+	int op, valor;
+
+	// A arvore esta vazia, logo:
+	a.raiz = NULL;
+
+	do {
+
+		
+		system("cls");
+		cout << "\n----- MENU DE OPCOES -----" << endl;
+		cout << "1 - Inserir na arvore" << endl;
+		cout << "2 - Consultar um noh da arvore" << endl;
+		cout << "3 - Consultar toda a arvore em Pre-ordem" << endl;
+		cout << "4 - Consultar toda a arvore Em ordem" << endl;
+		cout << "5 - Consultar toda a arvore em Pos-ordem" << endl;
+		cout << "6 - Excluir um noh da arvore" << endl;
+		cout << "7 - Esvaziar a arvore" << endl;
+		cout << "8 - Exibi por niveis" << endl;
+		cout << "9 - Sair" << endl;
+		cout << "\nInsira sua opcao: " << endl;
+		cin >> op;
+
+
+		switch (op) {
+
+		case 1:
+
+			cout << "Digite o numero a ser inserido na arvore: " << endl;
+			cin >> valor;
+
+			insereNoh(a, valor);
+		break;
+
+		case 2:
+
+			if (a.raiz == NULL) {
+				cout << "A arvore esta vazia!!!" << endl;
+				system("pause");
+			}
+			else
+			{
+				cout << "Digite o elemento a ser consultado: " << endl;
+				cin >> valor;
+
+				aux = busca(a, valor);
+
+				if (aux == NULL)
+				{
+					cout << "Numero nao encontrado na arvore!" << endl;
+					system("pause");
+				}
+				else
+				{
+					cout << "Numero encontrado na arvore!" << endl;
+					system("pause");
+				}
+			}
+		break;
+
+		case 3:
+
+			if (a.raiz == NULL) {
+				cout << "A arvore esta vazia!!!" << endl;
+				system("pause");
+			}
+			else
+			{
+				cout << "Listando os elementos da arvore em Pre-ordem:" << endl;
+				preOrdem(a);
+				system("pause");
+			}
+		break;
+
+		case 4:
+
+
+			if (a.raiz == NULL) {
+				cout << "A arvore esta vazia!!!" << endl;
+				system("pause");
+			}
+			else
+			{
+				cout << "Listando os elementos da arvore Em Ordem:" << endl;
+				emOrdem(a);
+				system("pause");
+			}
+			
+		break;
+		case 5:
+
+			if (a.raiz == NULL) {
+				cout << "A arvore esta vazia!!!" << endl;
+				system("pause");
+			}
+			else
+			{
+				cout << "Listando os elementos da arvore em pos-ordem:" << endl;
+				posOrdem(a);
+				system("pause");
+			}
+		break;
+
+		case 6:
+
+			if (a.raiz == NULL) {
+				cout << "A arvore esta vazia!!!" << endl;
+				system("pause");
+			}
+			else
+			{
+				cout << "Digite o numero que deseja excluir:" << endl;
+				cin >> valor;
+
+				aux = busca(a, valor);
+
+				if (aux == NULL)
+				{
+					cout << "Numero nao encontrado na arvore!" << endl;
+					system("pause");
+				}
+				else
+				{
+					remover(a, valor);
+					cout << "Numero excluido da arvore!" << endl;
+					system("pause");
+				}
+			}
+		break;
+		case 7:
+
+			if (a.raiz == NULL) {
+				cout << "A arvore esta vazia!!!" << endl;
+				system("pause");
+			}
+			else
+			{
+				a.raiz = desalocar(a.raiz);
+				cout << "Arvore esvaziada!!!" << endl;
+				system("pause");
+			}
+		break;
+
+	
+		case 8:
+
+			if (a.raiz == NULL) {
+				cout << "A arvore esta vazia!!!" << endl;
+				system("pause");
+			}
+			else
+			{
+				cout << "===========================================" << endl;
+				//exibi(a);
+				system("pause");
+			}
+		break;
+			
+		case 9:
+			op = 10;
+		break;
+		
+		
+		default:
+			cout << "Opcao invalida" << endl;
+			main();
+		}
+	} while (op != 10);
+
+
+	system("pause");
+	return 0;
+}
+
+  
