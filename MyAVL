@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
-
+//Consulta AVLtree .. www.cs.usfca.edu/~galles/visualization/AVLtree.html
 using namespace std;
 
 struct no
@@ -8,7 +8,7 @@ struct no
 	struct no* pai = NULL;
 	struct no* esquerda = NULL;
 	struct no* direita = NULL;
-	int val, fb, altura;
+	int val, fb=0, altura;
 };
 
 struct no* raiz = NULL;
@@ -35,8 +35,6 @@ void insereBinBusca(struct no* noh, int val)
 	{
 		raiz = new struct no;
 		raiz->val = val;
-		//fb(raiz);
-		raiz->fb = 0;
 	}
 	else
 	{
@@ -47,7 +45,8 @@ void insereBinBusca(struct no* noh, int val)
 				(*noh).esquerda = new struct no;
 				(*(*noh).esquerda).val = val;
 				noh->esquerda->pai = noh;
-				(*(*noh).esquerda).fb = 0;
+				fb(noh->pai);
+
 			}
 			else
 				insereBinBusca((*noh).esquerda, val);
@@ -59,7 +58,8 @@ void insereBinBusca(struct no* noh, int val)
 				(*noh).direita = new struct no;
 				(*(*noh).direita).val = val;
 				noh->direita->pai = noh;
-				(*(*noh).direita).fb = 0;
+				fb(noh->pai);
+
 			}
 			else
 			{
@@ -68,7 +68,17 @@ void insereBinBusca(struct no* noh, int val)
 		}
 	}
 }
+no* desalocar(no* noh){
 
+    if(noh != NULL){
+
+
+        noh->esquerda = desalocar(noh->esquerda);
+        noh->direita = desalocar(noh->direita);
+    }
+
+    return NULL;
+}
 void removeBinBusca(no *noh, int val)
 {
 	if (raiz == NULL)
@@ -164,8 +174,7 @@ void inOrder(struct no* noh)
 	if (raiz == NULL)
 	{
 		cout << "AVL vazia" << endl;
-		exit(0);
-	}
+    }
 	else {
 		if (noh->esquerda != NULL)
 			inOrder((*noh).esquerda);
@@ -306,14 +315,21 @@ int main()
 	int key;
 
 	while (running)
+
 	{
+	    system("cls");
+	    system("color A");
+
 		do {
-			cout << "MENU" << endl;
-			cout << "1: Inserir " << " - "; cout << "2: Excluir " << " - "; cout << "3: Em Ordem " << " - "; cout << "4: Pre Order " << " - ";
-			cout << "5: Post Order " << " - " << "6: Menor Valor " << " - " << "7: Maior valor" << " - " << "8: Sair" << endl;
+
+			cout << "\t--------------MENU-----------\t" << endl;
+			cout << "1: Inserir " << " - "; cout << "2: Excluir " << " - "; cout << "3: Em Ordem " << " - "; cout << "4: Pre Order ";
+			cout << "\n5: Post Order " << " - " << "6: Menor Valor " << " - " << "7: Maior valor" << " - " << "8: Esvaziar Arvore" << " - " << "9: Sair" << endl;;
 			cout << "Escolha: ";
 			cin >> option;
+
 		} while (option != 1 && option != 2 && option != 3 && option != 4 && option != 5 && option != 6 && option != 7 && option != 8);
+
 		switch (option)
 		{
 			case 1:
@@ -328,20 +344,30 @@ int main()
 				break;
 			case 3:
 				inOrder(raiz);
+				system("pause");
 				break;
 			case 4:
 				preOrder(raiz);
+				system("pause");
 				break;
 			case 5:
 				postOrder(raiz);
+				system("pause");
 				break;
 			case 6:
 				cout << "Menor valor: " << menorValor(raiz) << endl;
+				system("pause");
 				break;
 			case 7:
 				cout << "Maior valor: " << maiorValor(raiz) << endl;
+				system("pause");
 				break;
 			case 8:
+				raiz = desalocar(raiz);
+				cout << "Arvore esvaziada!!!" << endl;
+				system("pause");
+				break;
+            case 9:
 				running = false;
 				break;
 			}
