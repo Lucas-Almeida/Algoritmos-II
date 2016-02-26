@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
-//Consulta AVLtree .. www.cs.usfca.edu/~galles/visualization/AVLtree.html
+
 using namespace std;
 
 struct no
@@ -8,21 +8,21 @@ struct no
 	struct no* pai = NULL;
 	struct no* esquerda = NULL;
 	struct no* direita = NULL;
-	int val, fb=0, altura;
+	int val, altura, fb;
 };
 
-struct no* raiz = NULL;
-struct no* aux = NULL;
+struct no* aux = nullptr; // Usado na função de remoção
+struct no* raiz = nullptr;
 
 void insereBinBusca(struct no* noh, int val);
 void removeBinBusca(no *noh, int val);
 void inOrder(struct no* noh);
 void preOrder(struct no* noh);
 void postOrder(struct no* noh);
-no* rotDirEsq(struct no* noh);
-no* rotEsqDir(struct no* noh);
-no* rotDir(struct no* noh);
-no* rotEsq(struct no* noh);
+void rotDirEsq(struct no* noh);
+void rotEsqDir(struct no* noh);
+void rotDir(struct no* noh);
+void rotEsq(struct no* noh);
 void balancear(struct no* noh);
 void fb(struct no* noh);
 int altura(struct no* noh);
@@ -34,32 +34,31 @@ void insereBinBusca(struct no* noh, int val)
 	if (raiz == NULL)
 	{
 		raiz = new struct no;
-		raiz->val = val;
+		raiz->val = val;	
+		fb(raiz);
 	}
 	else
 	{
-		if ((*noh).val >= val)
+		if (noh->val >= val)
 		{
-			if ((*noh).esquerda == NULL)
+			if (noh->esquerda == NULL)
 			{
-				(*noh).esquerda = new struct no;
-				(*(*noh).esquerda).val = val;
-				noh->esquerda->pai = noh;
-				fb(noh->pai);
-
+				noh->esquerda = new struct no;
+				noh->esquerda->val = val;
+				noh->esquerda->pai = noh;				
+				fb(noh->esquerda);
 			}
 			else
-				insereBinBusca((*noh).esquerda, val);
+				insereBinBusca(noh->esquerda, val);
 		}
 		else
 		{
-			if ((*noh).direita == NULL)
+			if (noh->direita == NULL)
 			{
-				(*noh).direita = new struct no;
-				(*(*noh).direita).val = val;
+				noh->direita = new struct no;
+				noh->direita->val = val;
 				noh->direita->pai = noh;
-				fb(noh->pai);
-
+				fb(noh->direita);
 			}
 			else
 			{
@@ -68,50 +67,40 @@ void insereBinBusca(struct no* noh, int val)
 		}
 	}
 }
-no* desalocar(no* noh){
 
-    if(noh != NULL){
-
-
-        noh->esquerda = desalocar(noh->esquerda);
-        noh->direita = desalocar(noh->direita);
-    }
-
-    return NULL;
-}
 void removeBinBusca(no *noh, int val)
 {
 	if (raiz == NULL)
 	{
 		cout << "AVL vazia" << endl;
-		return;
-	}
-
-	if (noh->val == val)
-	{
-		if (noh->esquerda == NULL && noh->direita == NULL)
-		{
-			if (noh->pai->val > noh->val)
-				noh->pai->esquerda = NULL;
-			else
-				noh->pai->direita = NULL;
-			delete(noh);
-		}
-		else {
-			if (noh->esquerda != NULL)
-				aux = maiorValorP(noh->esquerda);
-			else
-				aux = menorValorP(noh->direita);
-			noh->val = aux->val;
-			removeBinBusca(aux, aux->val);
-		}
 	}
 	else {
-		if (noh->val > val)
-			removeBinBusca(noh->esquerda, val);
-		else
-			removeBinBusca(noh->direita, val);
-	}
+		if (noh->val == val)
+		{
+			if (noh->esquerda == NULL && noh->direita == NULL)
+			{
+				if (noh->pai->val > noh->val)
+					noh->pai->esquerda = NULL;
+				else
+					noh->pai->direita = NULL;
+				delete(noh);
+			}
+			else {
+				if (noh->esquerda != NULL)
+					aux = maiorValorP(noh->esquerda);
+				else
+					aux = menorValorP(noh->direita);
+				noh->val = aux->val;
+				removeBinBusca(aux, aux->val);
+			}
+		}
+		else {
+			if (noh->val > val)
+				removeBinBusca(noh->esquerda, val);
+			else
+				removeBinBusca(noh->direita, val);
+		}
+	}	
 }
 
 int menorValor(struct no* menor)
@@ -128,12 +117,7 @@ int menorValor(struct no* menor)
 
 no* menorValorP(struct no* menor)
 {
-	if (raiz == NULL)
-	{
-		cout << "AVL vazia" << endl;
-		return 0;
-	}
-
+	if (raiz == NULL) cout << "AVL vazia" << endl;
 	else
 	{
 		while (menor->esquerda != NULL)
@@ -159,7 +143,6 @@ no* maiorValorP(struct no* maior)
 	if (raiz == NULL)
 	{
 		cout << "AVL vazia" << endl;
-		exit(0);
 	}
 	else
 	{
@@ -174,25 +157,25 @@ void inOrder(struct no* noh)
 	if (raiz == NULL)
 	{
 		cout << "AVL vazia" << endl;
-    }
+	}
 	else {
 		if (noh->esquerda != NULL)
-			inOrder((*noh).esquerda);
-		cout << (*noh).val << " " << endl;
+			inOrder(noh->esquerda);
+		cout << noh->val << " " << endl;
 		if (noh->direita != NULL)
-			inOrder((*noh).direita);
-	}
+			inOrder(noh->direita);
+	}		
 }
 
 void preOrder(struct no* noh)
 {
 	if (raiz != NULL)
 	{
-		cout << (*noh).val << " " << endl;
+		cout << noh->val << " " << endl;
 		if (noh->esquerda != NULL)
-			preOrder((*noh).esquerda);
+			inOrder(noh->esquerda);
 		if (noh->direita != NULL)
-			preOrder((*noh).direita);
+			inOrder(noh->direita);
 	}
 	else cout << "AVL vazia" << endl;
 }
@@ -202,19 +185,66 @@ void postOrder(struct no* noh)
 	if (raiz != NULL)
 	{
 		if (noh->esquerda != NULL)
-			postOrder((*noh).esquerda);
+			inOrder(noh->esquerda);
 		if (noh->direita != NULL)
-			postOrder((*noh).direita);
-		cout << (*noh).val << endl;
+			inOrder(noh->direita);
+		cout << noh->val << endl;
 	}
 	else cout << "AVL vazia" << endl;
+}
+
+void rotDirEsq(struct no* noh)
+{
+	rotDir(noh->direita);
+	rotEsq(noh);
+}
+
+void rotEsqDir(struct no* noh)
+{
+	rotEsq(noh->esquerda);
+	rotDir(noh);
+}
+
+void rotEsq(struct no* noh)
+{
+	if (noh == raiz) {
+		noh->direita->pai = NULL;
+		raiz = noh->direita;
+	}
+	noh->direita->pai = noh->pai;
+	noh->pai = noh->direita;
+	if (noh->direita->esquerda != NULL)
+		noh->direita->esquerda->pai = noh;
+	noh->direita = noh->direita->esquerda;
+	noh->pai->esquerda = noh;
+	if (noh->pai->pai != NULL && noh->pai->pai->direita == noh)
+		noh->pai->pai->direita = noh->pai;
+	else if (noh->pai->pai != NULL) 
+		noh->pai->pai->esquerda = noh->pai;
+}
+
+void rotDir(struct no* noh)
+{
+	if (noh == raiz) {
+		noh->esquerda->pai = NULL;
+		raiz = noh->esquerda;
+	}
+	noh->esquerda->pai = noh->pai;
+	noh->pai = noh->esquerda;
+	if (noh->esquerda->direita != NULL)
+		noh->esquerda->direita->pai = noh;
+	noh->esquerda = noh->esquerda->direita;
+	noh->pai->direita = noh;
+	if (noh->pai->pai != NULL && noh->pai->pai->esquerda == noh)
+		noh->pai->pai->esquerda = noh->pai;
+	else if (noh->pai->pai != NULL) 
+		noh->pai->pai->direita = noh->pai;
 }
 
 void fb(struct no* noh)
 {
 	if (noh == NULL) return;
-
-	noh->fb = altura(noh->esquerda) - altura(noh->direita);
+	noh->fb = altura(noh->direita) - altura(noh->esquerda); 
 	if (noh->fb <= -2 || noh->fb >= 2)
 		balancear(noh);
 	else
@@ -223,87 +253,42 @@ void fb(struct no* noh)
 
 int altura(struct no* noh)
 {
-	if (raiz == NULL) return 0;
-
+	if (noh == NULL)
+		return 0;
 	int he = altura(noh->esquerda);
 	int hd = altura(noh->direita);
-	int maior;
-	if (he >= hd) maior = he;
-	else maior = hd;
-
-	return 1 + maior;
+	if (he > hd) return 1 + he;
+	return 1 + hd;
 }
 
-no* rotDirEsq(struct no* noh)
-{
-	rotDir(noh->direita);
-	rotEsq(noh);
-}
-
-no* rotEsqDir(struct no* noh)
-{
-	rotEsq(noh->esquerda);
-	rotDir(noh);
-}
-
-no* rotEsq(struct no* noh)
-{
-	noh->direita->pai = noh->pai;
-	noh->pai = noh->direita;
-	if (noh->direita->esquerda != NULL)
-		noh->direita->esquerda->pai = noh;
-	noh->direita = noh->direita->esquerda;
-	noh->pai->esquerda = noh;
-	if (noh->pai->pai->direita == noh && noh->pai->pai != NULL)
-		noh->pai->pai->direita = noh->pai;
-	else if (noh->pai->pai != NULL)
-		noh->pai->pai->esquerda = noh->pai;
-}
-
-no* rotDir(struct no* noh)
-{
-	noh->esquerda->pai = noh->pai;
-	noh->pai = noh->esquerda;
-	if (noh->esquerda->direita != NULL)
-		noh->esquerda->direita->pai = noh;
-	noh->esquerda = noh->esquerda->direita;
-	noh->pai->direita = noh;
-	if (noh->pai->pai->esquerda == noh && noh->pai->pai != NULL)
-		noh->pai->pai->esquerda = noh->pai;
-	else if (noh->pai->pai != NULL)
-		noh->pai->pai->direita = noh->pai;
-}
-
-void balancear(struct no* noh)
-{
-	if (noh == NULL)
-		cout << "AVL vazia" << endl;
+void balancear(struct no* noh){
+	if (noh->fb >= 2) {
+		int d = noh->fb - noh->direita->fb;
+		if (d < 0) d *= -1;
+		if (d < 3) rotEsq(noh); 
+		else rotDirEsq(noh);
+	}
 	else {
+		int d = noh->fb - noh->esquerda->fb;
+		if (d < 0) d *= -1;
+		if (d < 3) rotDir(noh);
+		if (d < 3) rotDir(noh);
+		else rotEsqDir(noh);
+	}	
+}
 
-        if (noh->fb >= 2) {
-			if (noh->direita->fb >= 0) {
-				noh = rotEsq(noh);
-				fb(noh->esquerda);
-			}
-			else {
-				noh = rotDirEsq(noh);
-
-			}
-		}
-
-	if (noh->fb <= -2) {
-
-			if (noh->esquerda->fb <= 0){
-
-				noh = rotDir(noh);
-				fb(noh->direita);
-			}
-			else {
-			noh = rotEsqDir(noh);
-			}
-		}
-
-
+void imprimirFB(struct no* noh)
+{
+	if (raiz == NULL)
+	{
+		cout << "AVL vazia" << endl;
+	}
+	else {
+		if (noh->esquerda != NULL)
+			imprimirFB(noh->esquerda);
+		cout << noh->val << " tem fb " << noh->fb << endl;
+		if (noh->direita != NULL)
+			imprimirFB(noh->direita);
 	}
 }
 
@@ -315,21 +300,14 @@ int main()
 	int key;
 
 	while (running)
-
 	{
-	    system("cls");
-	    system("color A");
-
 		do {
-
-			cout << "\t--------------MENU-----------\t" << endl;
-			cout << "1: Inserir " << " - "; cout << "2: Excluir " << " - "; cout << "3: Em Ordem " << " - "; cout << "4: Pre Order ";
-			cout << "\n5: Post Order " << " - " << "6: Menor Valor " << " - " << "7: Maior valor" << " - " << "8: Esvaziar Arvore" << " - " << "9: Sair" << endl;;
+			cout << "MENU" << endl;
+			cout << "1: Inserir " << " - "; cout << "2: Excluir " << " - "; cout << "3: Em Ordem " << " - "; cout << "4: Pre Order " << " - "; 
+			cout << "5: Post Order " << " - " << "6: Menor Valor " << " - " << "7: Maior valor" << " - " << "8: Imprimir FB's"<< " - " << "9: Sair" << endl;
 			cout << "Escolha: ";
 			cin >> option;
-
-		} while (option != 1 && option != 2 && option != 3 && option != 4 && option != 5 && option != 6 && option != 7 && option != 8);
-
+		} while (option != 1 && option != 2 && option != 3 && option != 4 && option != 5 && option != 6 && option != 7 && option != 8 && option != 9);
 		switch (option)
 		{
 			case 1:
@@ -344,30 +322,23 @@ int main()
 				break;
 			case 3:
 				inOrder(raiz);
-				system("pause");
 				break;
 			case 4:
 				preOrder(raiz);
-				system("pause");
 				break;
 			case 5:
 				postOrder(raiz);
-				system("pause");
 				break;
 			case 6:
 				cout << "Menor valor: " << menorValor(raiz) << endl;
-				system("pause");
 				break;
 			case 7:
 				cout << "Maior valor: " << maiorValor(raiz) << endl;
-				system("pause");
 				break;
 			case 8:
-				raiz = desalocar(raiz);
-				cout << "Arvore esvaziada!!!" << endl;
-				system("pause");
+				imprimirFB(raiz);
 				break;
-            case 9:
+			case 9:
 				running = false;
 				break;
 			}
@@ -375,3 +346,4 @@ int main()
 	system("pause");
 	return 0;
 }
+
